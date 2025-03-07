@@ -1,7 +1,8 @@
 [versions]
 
-kotlin = "2.1.0"
-agp = "8.6.1"
+kotlin = "2.1.10"
+ksoup = "0.2.2"
+agp = "8.9.0"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.7.3"
 kotlinx-datetime = "0.6.1"
@@ -30,6 +31,10 @@ ktor-client-winhttp = { module = "io.ktor:ktor-client-winhttp", version.ref = "k
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+
+# ksoup
+ksoup-core = { group = "com.fleeksoft.ksoup", name = "ksoup", version.ref = "ksoup" }
+ksoup-network = { group = "com.fleeksoft.ksoup", name = "ksoup-network", version.ref = "ksoup" }
 
 [plugins]
 

@@ -35,6 +35,10 @@ kotlin {
             implementation(libs.ktor.client.logging)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+
+            // Ksoup
+            implementation(libs.ksoup.core)
+            implementation(libs.ksoup.network)
         }
 
         commonTest.dependencies {
