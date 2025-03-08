@@ -9,7 +9,7 @@ kotlinx-datetime = "0.6.1"
 ktor = "3.0.3"
 koin = "4.0.1"
 compose = "1.7.3"
-androidx-activityCompose = "1.9.3"
+androidx-activityCompose = "1.10.1"
 
 [libraries]
 
@@ -34,7 +34,6 @@ androidx-activityCompose = { module = "androidx.activity:activity-compose", vers
 
 # ksoup
 ksoup-core = { group = "com.fleeksoft.ksoup", name = "ksoup", version.ref = "ksoup" }
-ksoup-network = { group = "com.fleeksoft.ksoup", name = "ksoup-network", version.ref = "ksoup" }
 
 [plugins]
 

@@ -1,5 +1,10 @@
-import com.yaikostudio.kparsetron.getFibonacciNumbers
+import com.yaikostudio.kparsetron.data.network.Downloader
+import io.ktor.http.parseUrl
+import kotlinx.coroutines.runBlocking
 
 fun main() {
-    println("getFibonacciNumbers(7)=${getFibonacciNumbers(7).joinToString(", ")}")
+    runBlocking {
+        val result = Downloader().download(parseUrl("https://www.youtube.com/watch?v=pmoYP_QvGsM")!!, null)
+        println(result)
+    }
 }

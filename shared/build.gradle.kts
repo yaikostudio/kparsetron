@@ -36,9 +36,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
 
-            // Ksoup
             implementation(libs.ksoup.core)
-            implementation(libs.ksoup.network)
         }
 
         commonTest.dependencies {
@@ -56,6 +54,10 @@ kotlin {
         }
 
         jsMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
+
+        wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
         }
 
