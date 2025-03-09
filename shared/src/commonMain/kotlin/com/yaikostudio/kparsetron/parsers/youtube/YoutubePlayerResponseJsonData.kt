@@ -3,11 +3,14 @@ package com.yaikostudio.kparsetron.parsers.youtube
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PlayerJsonData(
+data class YoutubePlayerResponseJsonData(
     val videoDetails: VideoDetails,
     val streamingData: StreamingData,
     val microformat: MicroFormat,
 ) {
+    val allThumbnails: List<YoutubeThumbnail.ThumbnailData>
+        get() = videoDetails.thumbnail.thumbnails + microformat.playerMicroformatRenderer.thumbnail.thumbnails
+
     @Serializable
     data class StreamingData(
         val adaptiveFormats: List<AdaptiveFormat>,
@@ -27,18 +30,6 @@ data class PlayerJsonData(
     }
 
     @Serializable
-    data class Thumbnail(
-        val thumbnails: List<ThumbnailData>,
-    ) {
-        @Serializable
-        data class ThumbnailData(
-            val url: String,
-            val width: Int,
-            val height: Int,
-        )
-    }
-
-    @Serializable
     data class VideoDetails(
         val title: String,
         val videoId: String,
@@ -48,7 +39,7 @@ data class PlayerJsonData(
         val shortDescription: String,
         val viewCount: String,
         val isLiveContent: Boolean,
-        val thumbnail: Thumbnail,
+        val thumbnail: YoutubeThumbnail,
     )
 
     @Serializable
@@ -60,7 +51,7 @@ data class PlayerJsonData(
             val ownerProfileUrl: String,
             val ownerChannelName: String,
             val uploadDate: String,
-            val thumbnail: Thumbnail,
+            val thumbnail: YoutubeThumbnail,
         )
     }
 }

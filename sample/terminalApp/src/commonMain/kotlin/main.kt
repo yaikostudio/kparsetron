@@ -25,6 +25,9 @@ fun main() {
                     println("Audio: ${alternative.media}")
                 }
             }
+            result.data.relatedMedia.forEach {
+                println("Related: $it")
+            }
         } else {
             throw UnsupportedOperationException("Unsupported result type: ${result::class}")
         }

@@ -8,8 +8,10 @@ import com.yaikostudio.kparsetron.entities.media.MediaThumbnail
 import com.yaikostudio.kparsetron.entities.media.Size
 import com.yaikostudio.kparsetron.entities.media.VideoDetail
 import com.yaikostudio.kparsetron.entities.media.VideoPart
+import com.yaikostudio.kparsetron.entities.media.VideoRelated
 import com.yaikostudio.kparsetron.network.Downloader
 import com.yaikostudio.kparsetron.parsers.Parser
+import com.yaikostudio.kparsetron.parsers.utils.findJson
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import kotlin.time.DurationUnit
@@ -24,20 +26,19 @@ class YoutubeDetailParser(
     }
 
     private val initialPlayerResponseRegex: Regex by lazy { "ytInitialPlayerResponse\\s*=\\s*(\\{.+?\\})\\s*;".toRegex() }
+    private val initialDataRegex: Regex by lazy { "ytInitialData\\s*=\\s*(\\{.+?\\})\\s*;".toRegex() }
 
     override suspend fun parse(url: Url): ParsedSiteData? {
         val doc = downloader.getAndParse(url, null)
 
         val bodyString = doc.body().toString()
-        val match = initialPlayerResponseRegex.find(bodyString) ?: return null
-        val jsonString = match.groupValues.getOrNull(1) ?: return null
 
-        val data: PlayerJsonData = json.decodeFromString(jsonString)
-        println("MATCH: $data")
+        val playerResponseData = json.findJson<YoutubePlayerResponseJsonData>(initialPlayerResponseRegex, bodyString) ?: return null
+        val initialJsonData = json.findJson<YoutubeInitialJsonData>(initialDataRegex, bodyString) ?: return null
 
         val videoAlternatives = mutableListOf<MediaFileAlternative>()
         val audioAlternatives = mutableListOf<MediaFileAlternative>()
-        data.streamingData.adaptiveFormats.forEach { format ->
+        playerResponseData.streamingData.adaptiveFormats.forEach { format ->
             val media = ITAG_MAP[format.itag] ?: return null
 
             val file = MediaFileAlternative(
@@ -51,18 +52,11 @@ class YoutubeDetailParser(
 
         return ParsedVideoDetail(
             data = VideoDetail(
-                title = data.videoDetails.title,
-                duration = data.videoDetails.lengthSeconds.toLongOrNull()?.toDuration(DurationUnit.SECONDS),
-                viewCount = data.videoDetails.viewCount.toLongOrNull(),
-                thumbnails = (data.videoDetails.thumbnail.thumbnails + data.microformat.playerMicroformatRenderer.thumbnail.thumbnails).map {
-                    MediaThumbnail(
-                        type = MediaThumbnail.Type.IMAGE,
-                        url = it.url,
-                        size = Size(
-                            width = it.width,
-                            height = it.height,
-                        ),
-                    )
+                title = playerResponseData.videoDetails.title,
+                duration = playerResponseData.videoDetails.lengthSeconds.toLongOrNull()?.toDuration(DurationUnit.SECONDS),
+                viewCount = playerResponseData.videoDetails.viewCount.toLongOrNull(),
+                thumbnails = playerResponseData.allThumbnails.map {
+                    it.toImageThumbnail()
                 },
                 parts = listOf(
                     VideoPart(
@@ -71,6 +65,17 @@ class YoutubeDetailParser(
                         audioAlternatives = audioAlternatives,
                     ),
                 ),
+                relatedMedia = initialJsonData.contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results.mapNotNull {
+                    it.compactVideoRenderer
+                }.map { v ->
+                    VideoRelated(
+                        title = v.title.simpleText,
+                        url = Url("https://www.youtube.com/watch?v=${v.videoId}"),
+                        thumbnails = v.thumbnail.thumbnails.map {
+                            it.toImageThumbnail()
+                        },
+                    )
+                }
             ),
         )
     }

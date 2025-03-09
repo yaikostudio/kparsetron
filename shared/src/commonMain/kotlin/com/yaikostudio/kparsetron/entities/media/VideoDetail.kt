@@ -8,4 +8,5 @@ data class VideoDetail(
     val viewCount: Long?,
     val thumbnails: List<MediaThumbnail>,
     val parts: List<VideoPart>,
+    val relatedMedia: List<VideoRelated>,
 )
