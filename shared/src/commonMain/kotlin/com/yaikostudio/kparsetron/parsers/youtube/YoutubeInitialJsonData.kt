@@ -62,7 +62,7 @@ data class YoutubeInitialJsonData(
                 ) {
                     @Serializable
                     data class Result(
-                        val endScreenVideoRenderer: EndScreenVideoRenderer,
+                        val endScreenVideoRenderer: EndScreenVideoRenderer? = null,
                     ) {
                         @Serializable
                         data class EndScreenVideoRenderer(

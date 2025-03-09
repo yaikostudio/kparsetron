@@ -76,11 +76,13 @@ class YoutubeDetailParser(
                         },
                     )
                 },
-                upNext = initialJsonData.playerOverlays.playerOverlayRenderer.endScreen.watchNextEndScreenRenderer.results.map {
+                upNext = initialJsonData.playerOverlays.playerOverlayRenderer.endScreen.watchNextEndScreenRenderer.results.mapNotNull {
+                    it.endScreenVideoRenderer
+                }.map {
                     VideoRelated(
-                        title = it.endScreenVideoRenderer.title.simpleText,
-                        url = Url("https://www.youtube.com/watch?v=${it.endScreenVideoRenderer.videoId}"),
-                        thumbnails = it.endScreenVideoRenderer.thumbnail.thumbnails.map {
+                        title = it.title.simpleText,
+                        url = Url("https://www.youtube.com/watch?v=${it.videoId}"),
+                        thumbnails = it.thumbnail.thumbnails.map {
                             it.toMediaThumbnail()
                         },
                     )
