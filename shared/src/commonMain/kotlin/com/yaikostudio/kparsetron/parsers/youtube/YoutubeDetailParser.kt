@@ -56,7 +56,7 @@ class YoutubeDetailParser(
                 duration = playerResponseData.videoDetails.lengthSeconds.toLongOrNull()?.toDuration(DurationUnit.SECONDS),
                 viewCount = playerResponseData.videoDetails.viewCount.toLongOrNull(),
                 thumbnails = playerResponseData.allThumbnails.map {
-                    it.toImageThumbnail()
+                    it.toMediaThumbnail()
                 },
                 parts = listOf(
                     VideoPart(
@@ -72,7 +72,16 @@ class YoutubeDetailParser(
                         title = v.title.simpleText,
                         url = Url("https://www.youtube.com/watch?v=${v.videoId}"),
                         thumbnails = v.thumbnail.thumbnails.map {
-                            it.toImageThumbnail()
+                            it.toMediaThumbnail()
+                        },
+                    )
+                },
+                upNext = initialJsonData.playerOverlays.playerOverlayRenderer.endScreen.watchNextEndScreenRenderer.results.map {
+                    VideoRelated(
+                        title = it.endScreenVideoRenderer.title.simpleText,
+                        url = Url("https://www.youtube.com/watch?v=${it.endScreenVideoRenderer.videoId}"),
+                        thumbnails = it.endScreenVideoRenderer.thumbnail.thumbnails.map {
+                            it.toMediaThumbnail()
                         },
                     )
                 }

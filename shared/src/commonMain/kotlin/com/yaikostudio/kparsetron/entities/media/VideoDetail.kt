@@ -9,4 +9,5 @@ data class VideoDetail(
     val thumbnails: List<MediaThumbnail>,
     val parts: List<VideoPart>,
     val relatedMedia: List<VideoRelated>,
+    val upNext: List<VideoRelated>,
 )

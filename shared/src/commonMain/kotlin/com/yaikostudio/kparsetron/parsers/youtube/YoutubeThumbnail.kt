@@ -14,7 +14,7 @@ data class YoutubeThumbnail(
         val width: Int,
         val height: Int,
     ) {
-        fun toImageThumbnail() = MediaThumbnail(
+        fun toMediaThumbnail() = MediaThumbnail(
             type = MediaThumbnail.Type.IMAGE,
             url = url,
             size = Size(

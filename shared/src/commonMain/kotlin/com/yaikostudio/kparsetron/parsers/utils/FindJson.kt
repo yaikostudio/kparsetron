@@ -9,7 +9,5 @@ inline fun <reified T> Json.findJson(
     val match = regex.find(input) ?: return null
     val jsonString = match.groupValues.getOrNull(1) ?: return null
 
-    println("-".repeat(80))
-    println(jsonString)
     return decodeFromString<T>(jsonString)
 }

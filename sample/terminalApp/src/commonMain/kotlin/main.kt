@@ -28,6 +28,9 @@ fun main() {
             result.data.relatedMedia.forEach {
                 println("Related: $it")
             }
+            result.data.upNext.forEach {
+                println("Up Next: $it")
+            }
         } else {
             throw UnsupportedOperationException("Unsupported result type: ${result::class}")
         }
