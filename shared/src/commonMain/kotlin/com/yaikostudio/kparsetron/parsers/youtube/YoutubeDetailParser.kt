@@ -4,8 +4,6 @@ import com.yaikostudio.kparsetron.entities.ParsedSiteData
 import com.yaikostudio.kparsetron.entities.ParsedVideoDetail
 import com.yaikostudio.kparsetron.entities.media.Media
 import com.yaikostudio.kparsetron.entities.media.MediaFileAlternative
-import com.yaikostudio.kparsetron.entities.media.MediaThumbnail
-import com.yaikostudio.kparsetron.entities.media.Size
 import com.yaikostudio.kparsetron.entities.media.VideoDetail
 import com.yaikostudio.kparsetron.entities.media.VideoPart
 import com.yaikostudio.kparsetron.entities.media.VideoRelated
@@ -28,6 +26,24 @@ class YoutubeDetailParser(
     private val initialPlayerResponseRegex: Regex by lazy { "ytInitialPlayerResponse\\s*=\\s*(\\{.+?\\})\\s*;".toRegex() }
     private val initialDataRegex: Regex by lazy { "ytInitialData\\s*=\\s*(\\{.+?\\})\\s*;".toRegex() }
 
+    override suspend fun supports(url: Url): Boolean {
+        return when (url.host) {
+            "www.youtube.com" -> {
+                url.encodedPath.startsWith("/watch")
+            }
+
+            "youtube.com" -> {
+                url.encodedPath.startsWith("/watch")
+            }
+
+            "youtu.be" -> {
+                url.encodedPath.startsWith("/")
+            }
+
+            else -> false
+        }
+    }
+
     override suspend fun parse(url: Url): ParsedSiteData? {
         val doc = downloader.getAndParse(url, null)
 
@@ -44,7 +60,7 @@ class YoutubeDetailParser(
             val file = MediaFileAlternative(
                 media = media,
             )
-            when(media) {
+            when (media) {
                 is Media.Video -> videoAlternatives.add(file)
                 is Media.Audio -> audioAlternatives.add(file)
             }

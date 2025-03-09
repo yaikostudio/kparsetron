@@ -21,6 +21,6 @@ class Kparsetron {
     suspend fun parse(url: Url): ParsedSiteData? {
         val parsers = SupportedSites.instance.getParsers(url.host) ?: return null
 
-        return parsers.firstNotNullOfOrNull { it.parse(url) }
+        return parsers.firstOrNull { it.supports(url) }?.parse(url)
     }
 }
