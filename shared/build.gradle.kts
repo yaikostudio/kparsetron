@@ -34,7 +34,6 @@ kotlin {
             implementation(libs.ktor.client.serialization)
             implementation(libs.ktor.client.logging)
             implementation(libs.koin.core)
-            implementation(libs.koin.compose)
 
             implementation(libs.ksoup.core)
         }
