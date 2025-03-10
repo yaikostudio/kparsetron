@@ -1,6 +1,74 @@
 # kparsetron
 
-Kotlin Multiplatform Library
+🚀 **kparsetron** – A Kotlin Multiplatform Library for Parsing and Extracting Information from Popular Websites.
+
+## 🌍 Overview
+
+kparsetron is a powerful, lightweight, and easy-to-use **Kotlin Multiplatform** (KMP) library built on top of [ksoup](https://github.com/micahlt/ksoup) (a Kotlin-native port of BeautifulSoup). It provides a streamlined way to extract structured data from various websites, similar to what `youtube-dl` does but as a native Kotlin library.
+
+## ✨ Features
+
+- ✅ **Kotlin Multiplatform (JVM, Native, JS, Android, iOS, etc.)**
+- ✅ **Fast and Efficient HTML Parsing** with `ksoup`
+- ✅ **Supports Multiple Popular Websites**
+- ✅ **Simple API for Extracting Metadata** (titles, descriptions, media links, etc.)
+- ✅ **Lightweight and No External Dependencies**
+
+## 📦 Installation
+
+Add the dependency in your **Kotlin Multiplatform** project:
+
+```kotlin
+// Gradle (Kotlin DSL)
+dependencies {
+    implementation("com.yaikostudio.kparsetron:kparsetron:0.1.0")
+}
+```
+
+## 🚀 Usage
+
+### Basic Example:
+
+```kotlin
+import com.yaikostudio.kparsetron.kparsetron
+
+fun main() {
+    val parser = Kparsetron()
+    val result = parser.parse("https://example.com")
+    
+    println("Title: ${result.title}")
+    println("Description: ${result.description}")
+    println("Media: ${result.mediaLinks}")
+}
+```
+
+## 🌐 Supported Sites
+
+kparsetron currently supports:
+
+- YouTube
+
+Support for additional sites will be added in future updates!
+
+## 🛠 Roadmap
+
+-
+
+## 📝 Contributing
+
+We welcome contributions! Feel free to fork the repo, submit PRs, or suggest new features.
+
+## 📄 License
+
+kparsetron is open-source and released into the public domain by the copyright holders.
+
+## 🤖 About YaikoStudio
+
+Built with ❤️ by [YaikoStudio](https://yaikostudio.com) for developers who love **structured data from messy web pages**.
+
+---
+
+*"If it's HTML, we parse it!"*
 
 ### Run Sample App
 
