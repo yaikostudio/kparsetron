@@ -1,6 +1,7 @@
 package com.yaikostudio.kparsetron.parsers
 
 import com.yaikostudio.kparsetron.network.Downloader
+import com.yaikostudio.kparsetron.parsers.instagram.InstagramReelParser
 import com.yaikostudio.kparsetron.parsers.youtube.YoutubeDetailParser
 
 class SupportedSites {
@@ -10,13 +11,20 @@ class SupportedSites {
 
     private val supportedSitesMapping: List<Pair<String, List<Parser>>>
 
+    private fun listOfParsers(vararg parsers: Parser): List<Pair<String, List<Parser>>> {
+        return parsers.flatMap { p ->
+            p.supportedHosts().map { it to p }
+        }.groupBy { (host, _) -> host }
+            .mapValues { (_, parsers) -> parsers.map { it.second } }
+            .toList()
+    }
+
     init {
         val downloader = Downloader()
 
-        supportedSitesMapping = listOf(
-            "youtube.com" to listOf(YoutubeDetailParser(downloader)),
-            "www.youtube.com" to listOf(YoutubeDetailParser(downloader)),
-            "youtu.be" to listOf(YoutubeDetailParser(downloader)),
+        supportedSitesMapping = listOfParsers(
+            YoutubeDetailParser(downloader),
+            InstagramReelParser(downloader),
         )
     }
 

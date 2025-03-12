@@ -1,4 +1,4 @@
-package com.yaikostudio.kparsetron.parsers.utils
+package com.yaikostudio.kparsetron.parsers.extensions
 
 import kotlinx.serialization.json.Json
 

@@ -9,45 +9,36 @@ import com.yaikostudio.kparsetron.entities.media.VideoPart
 import com.yaikostudio.kparsetron.entities.media.VideoRelated
 import com.yaikostudio.kparsetron.network.Downloader
 import com.yaikostudio.kparsetron.parsers.Parser
-import com.yaikostudio.kparsetron.parsers.utils.findJson
+import com.yaikostudio.kparsetron.parsers.extensions.findJson
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Url
-import kotlinx.serialization.json.Json
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 class YoutubeDetailParser(
     private val downloader: Downloader,
-) : Parser {
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-    }
+) : Parser() {
 
     private val initialPlayerResponseRegex: Regex by lazy { "ytInitialPlayerResponse\\s*=\\s*(\\{.+?\\})\\s*;".toRegex() }
     private val initialDataRegex: Regex by lazy { "ytInitialData\\s*=\\s*(\\{.+?\\})\\s*;".toRegex() }
 
+    override fun supportedHosts() = listOf(
+        "www.youtube.com",
+        "youtube.com",
+        "youtu.be",
+    )
+
     override suspend fun supports(url: Url): Boolean {
         return when (url.host) {
-            "www.youtube.com" -> {
-                url.encodedPath.startsWith("/watch")
-            }
-
-            "youtube.com" -> {
-                url.encodedPath.startsWith("/watch")
-            }
-
-            "youtu.be" -> {
-                url.encodedPath.startsWith("/")
-            }
-
+            "www.youtube.com" -> url.encodedPath.startsWith("/watch")
+            "youtube.com" -> url.encodedPath.startsWith("/watch")
+            "youtu.be" -> true
             else -> false
         }
     }
 
     override suspend fun parse(url: Url): ParsedSiteData? {
-        val doc = downloader.getAndParse(url, null)
-
-        val bodyString = doc.body().toString()
+        val bodyString = downloader.get(url, null).bodyAsText()
 
         val playerResponseData = json.findJson<YoutubePlayerResponseJsonData>(initialPlayerResponseRegex, bodyString) ?: return null
         val initialJsonData = json.findJson<YoutubeInitialJsonData>(initialDataRegex, bodyString) ?: return null
