@@ -1,14 +1,22 @@
 package com.yaikostudio.kparsetron.parsers.instagram
 
 import com.yaikostudio.kparsetron.entities.ParsedSiteData
+import com.yaikostudio.kparsetron.entities.ParsedVideoDetail
+import com.yaikostudio.kparsetron.entities.media.Media
+import com.yaikostudio.kparsetron.entities.media.MediaFileAlternative
+import com.yaikostudio.kparsetron.entities.media.StreamingType
+import com.yaikostudio.kparsetron.entities.media.VideoContainer
+import com.yaikostudio.kparsetron.entities.media.VideoDetail
+import com.yaikostudio.kparsetron.entities.media.VideoPart
 import com.yaikostudio.kparsetron.network.Downloader
-import com.yaikostudio.kparsetron.network.NetworkHelperKtor
 import com.yaikostudio.kparsetron.network.NetworkHelperKtor.Companion.getCookies
 import com.yaikostudio.kparsetron.parsers.extensions.hasAnySegment
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.parseUrl
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class InstagramReelParser(
     private val downloader: Downloader,
@@ -33,27 +41,19 @@ class InstagramReelParser(
         val matches = VALID_URL.find(url.toString()) ?: return null
         val videoId = matches.groups["id"]?.value ?: return null
 
-        val pk = idToPk(videoId)
-        println("videoId=$videoId, pk=$pk")
-        val rulingContentUrl = parseUrl("$API_BASE_URL/web/get_ruling_for_content/?content_type=MEDIA&target_id=$pk") ?: return null
+        val rulingContentUrl = parseUrl("$API_BASE_URL/web/get_ruling_for_content/?content_type=MEDIA&target_id=" + idToPk(videoId)) ?: return null
 
         val response = downloader.get(
             url = rulingContentUrl,
-            headers = apiHeaders,
+            extraHeaders = apiHeaders,
         )
-        println("response=${response.getCookies()}")
-        println("response=${NetworkHelperKtor.instance.getCookies(parseUrl("https://www.instagram.com")!!)}")
 
         val csrfToken = response.getCookies().find {
             it.name == "csrftoken"
         }?.value
 
-        val variables = GeneralInfoData(
+        val variables = GeneralInfoRequest(
             shortcode = videoId,
-            childCommentCount = 3,
-            fetchCommentCount = 40,
-            parentCommentCount = 24,
-            hasThreadedComments = true,
         )
         val generalInfoUrl = URLBuilder("https://www.instagram.com/graphql/query/")
             .apply {
@@ -61,18 +61,44 @@ class InstagramReelParser(
                 parameters.append("variables", json.encodeToString(variables))
             }
             .build()
-        println("generalInfoUrl=$generalInfoUrl")
 
-        val generalInfo = downloader.get(
+        val generalInfoResponse = downloader.get(
             url = generalInfoUrl,
             referrer = url,
-            headers = apiHeaders + mapOf(
+            extraHeaders = apiHeaders + mapOf(
                 "X-CSRFToken" to (csrfToken ?: ""),
                 "X-Requested-With" to "XMLHttpRequest",
             ),
         )
-        println("generalInfo=${generalInfo.bodyAsText()}")
+        val generalInfo = json.decodeFromString<GeneralInfoResponse>(generalInfoResponse.bodyAsText())
 
-        return null
+        return with(generalInfo.data.xdtShortcodeMedia) {
+            ParsedVideoDetail(
+                data = VideoDetail(
+                    title = edgeMediaToCaption.edges.first().node.text,
+                    duration = videoDuration?.toDuration(DurationUnit.SECONDS),
+                    viewCount = videoViewCount,
+                    thumbnails = displayResources.map { it.toMediaThumbnail() },
+                    parts = listOf(
+                        VideoPart(
+                            title = null,
+                            videoAlternatives = listOf(
+                                MediaFileAlternative(
+                                    media = Media.Video(
+                                        streamingType = StreamingType.DIRECT,
+                                        container = VideoContainer.MP4,
+                                        videoCodec = null,
+                                    ),
+                                    url = parseUrl(videoUrl!!) ?: return null,
+                                ),
+                            ),
+                            audioAlternatives = emptyList(),
+                        )
+                    ),
+                    relatedMedia = emptyList(),
+                    upNext = emptyList(),
+                ),
+            )
+        }
     }
 }

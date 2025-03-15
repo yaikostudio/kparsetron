@@ -3,7 +3,7 @@ package com.yaikostudio.kparsetron.parsers.youtube
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class YoutubePlayerResponseJsonData(
+internal data class YoutubePlayerResponseJsonData(
     val videoDetails: VideoDetails,
     val streamingData: StreamingData,
     val microformat: MicroFormat,

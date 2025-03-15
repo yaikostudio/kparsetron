@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 
 fun main() {
     runBlocking {
-        val result = Kparsetron().parse("youtu.be/pmoYP_QvGsM")
+        val result = Kparsetron().parse("https://www.instagram.com/sviatoslav.vakarchuk/reel/DG8cE9dt2MI/")
         println(result)
 
         if (null == result) {
@@ -19,10 +19,10 @@ fun main() {
             result.data.parts.forEach { part ->
                 println("Part title: ${part.title}")
                 part.videoAlternatives.forEach { alternative ->
-                    println("Video: ${alternative.media}")
+                    println("Video: $alternative")
                 }
                 part.audioAlternatives.forEach { alternative ->
-                    println("Audio: ${alternative.media}")
+                    println("Audio: $alternative")
                 }
             }
             result.data.relatedMedia.forEach {

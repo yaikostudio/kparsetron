@@ -50,6 +50,7 @@ class YoutubeDetailParser(
 
             val file = MediaFileAlternative(
                 media = media,
+                url = TODO(),
             )
             when (media) {
                 is Media.Video -> videoAlternatives.add(file)
