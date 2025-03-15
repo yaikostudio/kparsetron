@@ -21,6 +21,8 @@ internal data class GeneralInfoResponse(
             @SerialName("video_duration") val videoDuration: Double? = null,
             @SerialName("dimensions") val dimensions: Dimensions,
             @SerialName("display_resources") val displayResources: List<DisplayResource>,
+            @SerialName("owner") val owner: Owner,
+            @SerialName("edge_media_to_parent_comment") val edgeMediaToParentComment: EdgeMediaToParentComment,
         ) {
             @Serializable
             data class EdgeMediaToCaption(
@@ -57,6 +59,46 @@ internal data class GeneralInfoResponse(
                         height = configHeight,
                     ),
                 )
+            }
+
+            @Serializable
+            data class Owner(
+                @SerialName("id") val id: String,
+                @SerialName("username") val username: String,
+                @SerialName("profile_pic_url") val profilePicUrl: String,
+                @SerialName("is_verified") val isVerified: Boolean,
+                @SerialName("full_name") val fullName: String,
+                @SerialName("edge_followed_by") val edgeFollowedBy: EdgeFollowedBy,
+            ) {
+                @Serializable
+                data class EdgeFollowedBy(
+                    @SerialName("count") val count: Int,
+                )
+            }
+
+            @Serializable
+            data class EdgeMediaToParentComment(
+                @SerialName("edges") val edges: List<Edge>,
+            ) {
+                @Serializable
+                data class Edge(
+                    @SerialName("node") val node: Node,
+                ) {
+                    @Serializable
+                    data class Node(
+                        @SerialName("text") val text: String,
+                        @SerialName("created_at") val createdAt: Long,
+                        @SerialName("owner") val owner: CommentOwner,
+                    ) {
+                        @Serializable
+                        data class CommentOwner(
+                            @SerialName("id") val id: String,
+                            @SerialName("username") val username: String,
+                            @SerialName("is_verified") val isVerified: Boolean,
+                            @SerialName("profile_pic_url") val profilePicUrl: String,
+                        )
+                    }
+                }
             }
         }
     }

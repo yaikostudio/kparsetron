@@ -11,6 +11,7 @@ fun main() {
             println("Failed to parse video.")
         } else if (result is ParsedVideoDetail) {
             println("Title: ${result.data.title}")
+            println("Owner: ${result.data.owner}")
             println("Duration: ${result.data.duration}")
             println("View Count: ${result.data.viewCount}")
             result.data.thumbnails.forEach {
@@ -30,6 +31,9 @@ fun main() {
             }
             result.data.upNext.forEach {
                 println("Up Next: $it")
+            }
+            result.data.comments.forEach {
+                println("Comment: $it")
             }
         } else {
             throw UnsupportedOperationException("Unsupported result type: ${result::class}")

@@ -61,6 +61,7 @@ class YoutubeDetailParser(
         return ParsedVideoDetail(
             data = VideoDetail(
                 title = playerResponseData.videoDetails.title,
+                owner = TODO(),
                 duration = playerResponseData.videoDetails.lengthSeconds.toLongOrNull()?.toDuration(DurationUnit.SECONDS),
                 viewCount = playerResponseData.videoDetails.viewCount.toLongOrNull(),
                 thumbnails = playerResponseData.allThumbnails.map {
@@ -94,7 +95,8 @@ class YoutubeDetailParser(
                             it.toMediaThumbnail()
                         },
                     )
-                }
+                },
+                comments = emptyList(),
             ),
         )
     }

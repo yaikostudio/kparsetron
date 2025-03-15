@@ -2,12 +2,15 @@ package com.yaikostudio.kparsetron.parsers.instagram
 
 import com.yaikostudio.kparsetron.entities.ParsedSiteData
 import com.yaikostudio.kparsetron.entities.ParsedVideoDetail
+import com.yaikostudio.kparsetron.entities.interactions.Comment
 import com.yaikostudio.kparsetron.entities.media.Media
 import com.yaikostudio.kparsetron.entities.media.MediaFileAlternative
 import com.yaikostudio.kparsetron.entities.media.StreamingType
 import com.yaikostudio.kparsetron.entities.media.VideoContainer
 import com.yaikostudio.kparsetron.entities.media.VideoDetail
 import com.yaikostudio.kparsetron.entities.media.VideoPart
+import com.yaikostudio.kparsetron.entities.network.ResourceUrl
+import com.yaikostudio.kparsetron.entities.users.Account
 import com.yaikostudio.kparsetron.network.Downloader
 import com.yaikostudio.kparsetron.network.NetworkHelperKtor.Companion.getCookies
 import com.yaikostudio.kparsetron.parsers.extensions.hasAnySegment
@@ -15,6 +18,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.parseUrl
+import kotlinx.datetime.Instant
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -76,6 +80,16 @@ class InstagramReelParser(
             ParsedVideoDetail(
                 data = VideoDetail(
                     title = edgeMediaToCaption.edges.first().node.text,
+                    owner = with(owner) {
+                        Account(
+                            id = id,
+                            name = fullName,
+                            username = username,
+                            isVerified = isVerified,
+                            profilePicUrl = ResourceUrl.Unprotected(profilePicUrl),
+                            followers = edgeFollowedBy.count,
+                        )
+                    },
                     duration = videoDuration?.toDuration(DurationUnit.SECONDS),
                     viewCount = videoViewCount,
                     thumbnails = displayResources.map { it.toMediaThumbnail() },
@@ -97,6 +111,22 @@ class InstagramReelParser(
                     ),
                     relatedMedia = emptyList(),
                     upNext = emptyList(),
+                    comments = edgeMediaToParentComment.edges.map {
+                        with(it.node) {
+                            Comment(
+                                text = text,
+                                author = Account(
+                                    id = owner.id,
+                                    name = null,
+                                    username = owner.username,
+                                    isVerified = owner.isVerified,
+                                    profilePicUrl = ResourceUrl.Unprotected(owner.profilePicUrl),
+                                    followers = null,
+                                ),
+                                postedAt = Instant.fromEpochSeconds(createdAt),
+                            )
+                        }
+                    },
                 ),
             )
         }
