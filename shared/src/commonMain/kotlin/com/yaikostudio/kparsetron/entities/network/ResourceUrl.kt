@@ -6,4 +6,6 @@ sealed class ResourceUrl {
     data class Unprotected(
         val url: Url,
     ) : ResourceUrl()
+
+    data object Unsupported : ResourceUrl()
 }

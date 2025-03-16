@@ -7,6 +7,8 @@ import com.yaikostudio.kparsetron.entities.media.MediaFileAlternative
 import com.yaikostudio.kparsetron.entities.media.VideoDetail
 import com.yaikostudio.kparsetron.entities.media.VideoPart
 import com.yaikostudio.kparsetron.entities.media.VideoRelated
+import com.yaikostudio.kparsetron.entities.network.ResourceUrl
+import com.yaikostudio.kparsetron.entities.users.Account
 import com.yaikostudio.kparsetron.network.Downloader
 import com.yaikostudio.kparsetron.parsers.Parser
 import com.yaikostudio.kparsetron.parsers.extensions.findJson
@@ -54,15 +56,13 @@ class YoutubeDetailParser(
             val media = ITAG_MAP[format.itag] ?: return Result.failure(IllegalArgumentException("Unknown ITAG: ${format.itag}"))
 
             val parsedUrlVideoParameters = parseQueryString(format.signatureCipher)
-            println("Parsed URL Video Parameters: $parsedUrlVideoParameters")
             val fmtVideoUrl = parseUrl(parsedUrlVideoParameters["url"]!!) ?: return Result.failure(IllegalArgumentException("Unable to parse video URL"))
             val fmtVideoSignature = parsedUrlVideoParameters["s"] ?: return Result.failure(IllegalArgumentException("Unable to parse video signature"))
             val fmtVideoSp = parsedUrlVideoParameters["sp"] ?: return Result.failure(IllegalArgumentException("Unable to parse video sp"))
 
-
             val file = MediaFileAlternative(
                 media = media,
-                url = TODO(),
+                url = ResourceUrl.Unsupported,
             )
             when (media) {
                 is Media.Video -> videoAlternatives.add(file)
@@ -73,7 +73,14 @@ class YoutubeDetailParser(
         val parsed = ParsedVideoDetail(
             data = VideoDetail(
                 title = playerResponseData.videoDetails.title,
-                owner = TODO(),
+                owner = Account(
+                    id = playerResponseData.videoDetails.channelId,
+                    name = playerResponseData.videoDetails.author,
+                    username = playerResponseData.videoDetails.channelId,
+                    isVerified = false,
+                    profilePicUrl = null,
+                    followers = null,
+                ),
                 duration = playerResponseData.videoDetails.lengthSeconds.toLongOrNull()?.toDuration(DurationUnit.SECONDS),
                 viewCount = playerResponseData.videoDetails.viewCount.toLongOrNull(),
                 thumbnails = playerResponseData.allThumbnails.map {
