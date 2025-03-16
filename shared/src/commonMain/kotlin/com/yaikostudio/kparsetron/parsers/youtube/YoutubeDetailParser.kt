@@ -11,7 +11,10 @@ import com.yaikostudio.kparsetron.network.Downloader
 import com.yaikostudio.kparsetron.parsers.Parser
 import com.yaikostudio.kparsetron.parsers.extensions.findJson
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.parseQueryString
+import io.ktor.http.parseUrl
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -37,16 +40,25 @@ class YoutubeDetailParser(
         }
     }
 
-    override suspend fun parse(url: Url): ParsedSiteData? {
+    override suspend fun parse(url: Url): Result<ParsedSiteData> {
         val bodyString = downloader.get(url, null).bodyAsText()
 
-        val playerResponseData = json.findJson<YoutubePlayerResponseJsonData>(initialPlayerResponseRegex, bodyString) ?: return null
-        val initialJsonData = json.findJson<YoutubeInitialJsonData>(initialDataRegex, bodyString) ?: return null
+        val playerResponseData = json.findJson<YoutubePlayerResponseJsonData>(initialPlayerResponseRegex, bodyString)
+        playerResponseData ?: return Result.failure(IllegalArgumentException("Unable to parse player response data"))
+        val initialJsonData = json.findJson<YoutubeInitialJsonData>(initialDataRegex, bodyString)
+        initialJsonData ?: return Result.failure(IllegalArgumentException("Unable to parse initial data"))
 
         val videoAlternatives = mutableListOf<MediaFileAlternative>()
         val audioAlternatives = mutableListOf<MediaFileAlternative>()
         playerResponseData.streamingData.adaptiveFormats.forEach { format ->
-            val media = ITAG_MAP[format.itag] ?: return null
+            val media = ITAG_MAP[format.itag] ?: return Result.failure(IllegalArgumentException("Unknown ITAG: ${format.itag}"))
+
+            val parsedUrlVideoParameters = parseQueryString(format.signatureCipher)
+            println("Parsed URL Video Parameters: $parsedUrlVideoParameters")
+            val fmtVideoUrl = parseUrl(parsedUrlVideoParameters["url"]!!) ?: return Result.failure(IllegalArgumentException("Unable to parse video URL"))
+            val fmtVideoSignature = parsedUrlVideoParameters["s"] ?: return Result.failure(IllegalArgumentException("Unable to parse video signature"))
+            val fmtVideoSp = parsedUrlVideoParameters["sp"] ?: return Result.failure(IllegalArgumentException("Unable to parse video sp"))
+
 
             val file = MediaFileAlternative(
                 media = media,
@@ -58,7 +70,7 @@ class YoutubeDetailParser(
             }
         }
 
-        return ParsedVideoDetail(
+        val parsed = ParsedVideoDetail(
             data = VideoDetail(
                 title = playerResponseData.videoDetails.title,
                 owner = TODO(),
@@ -99,5 +111,7 @@ class YoutubeDetailParser(
                 comments = emptyList(),
             ),
         )
+
+        return Result.success(parsed)
     }
 }

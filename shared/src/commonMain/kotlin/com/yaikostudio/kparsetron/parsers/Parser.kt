@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 abstract class Parser {
     abstract fun supportedHosts(): List<String>
     abstract suspend fun supports(url: Url): Boolean
-    abstract suspend fun parse(url: Url): ParsedSiteData?
+    abstract suspend fun parse(url: Url): Result<ParsedSiteData>
 
     protected val json = Json {
         ignoreUnknownKeys = true

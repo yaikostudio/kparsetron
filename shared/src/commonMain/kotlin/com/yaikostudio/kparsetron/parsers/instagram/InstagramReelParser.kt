@@ -41,11 +41,12 @@ class InstagramReelParser(
         return false
     }
 
-    override suspend fun parse(url: Url): ParsedSiteData? {
-        val matches = VALID_URL.find(url.toString()) ?: return null
-        val videoId = matches.groups["id"]?.value ?: return null
+    override suspend fun parse(url: Url): Result<ParsedSiteData> {
+        val matches = VALID_URL.find(url.toString()) ?: return Result.failure(IllegalArgumentException("Invalid URL"))
+        val videoId = matches.groups["id"]?.value ?: return Result.failure(IllegalArgumentException("Invalid URL"))
 
-        val rulingContentUrl = parseUrl("$API_BASE_URL/web/get_ruling_for_content/?content_type=MEDIA&target_id=" + idToPk(videoId)) ?: return null
+        val rulingContentUrl = parseUrl("$API_BASE_URL/web/get_ruling_for_content/?content_type=MEDIA&target_id=" + idToPk(videoId))
+        rulingContentUrl ?: return Result.failure(IllegalArgumentException("Invalid URL"))
 
         val response = downloader.get(
             url = rulingContentUrl,
@@ -76,7 +77,7 @@ class InstagramReelParser(
         )
         val generalInfo = json.decodeFromString<GeneralInfoResponse>(generalInfoResponse.bodyAsText())
 
-        return with(generalInfo.data.xdtShortcodeMedia) {
+        val detail = with(generalInfo.data.xdtShortcodeMedia) {
             ParsedVideoDetail(
                 data = VideoDetail(
                     title = edgeMediaToCaption.edges.first().node.text,
@@ -103,7 +104,7 @@ class InstagramReelParser(
                                         container = VideoContainer.MP4,
                                         videoCodec = null,
                                     ),
-                                    url = parseUrl(videoUrl!!) ?: return null,
+                                    url = parseUrl(videoUrl!!) ?: return Result.failure(IllegalArgumentException("Invalid video URL")),
                                 ),
                             ),
                             audioAlternatives = emptyList(),
@@ -130,5 +131,7 @@ class InstagramReelParser(
                 ),
             )
         }
+
+        return Result.success(detail)
     }
 }
