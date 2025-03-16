@@ -72,7 +72,7 @@ internal data class GeneralInfoResponse(
             ) {
                 @Serializable
                 data class EdgeFollowedBy(
-                    @SerialName("count") val count: Int,
+                    @SerialName("count") val count: Long,
                 )
             }
 

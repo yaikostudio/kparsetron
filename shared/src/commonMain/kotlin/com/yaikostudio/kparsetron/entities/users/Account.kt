@@ -8,5 +8,5 @@ data class Account(
     val username: String,
     val isVerified: Boolean,
     val profilePicUrl: ResourceUrl?,
-    val followers: Int?,
+    val followers: Long?,
 )

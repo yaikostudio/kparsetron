@@ -32,13 +32,15 @@ class Downloader {
         )
     }
 
-    suspend fun getAndParse(url: Url, referrer: Url?): Document {
+    suspend fun getAndParse(url: Url, referrer: Url?): Pair<String, Document> {
         val response = get(url, referrer)
+        val html = response.bodyAsText()
 
-        return Ksoup.parse(
-            html = response.bodyAsText(),
+        val doc = Ksoup.parse(
+            html = html,
             parser = Parser.htmlParser(),
             baseUri = response.request.url.toString(), // finalUrl after redirects
         )
+        return html to doc
     }
 }

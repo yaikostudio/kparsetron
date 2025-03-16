@@ -1,8 +1,8 @@
 package com.yaikostudio.kparsetron.entities.media
 
-import io.ktor.http.Url
+import com.yaikostudio.kparsetron.entities.network.ResourceUrl
 
 data class MediaFileAlternative(
     val media: Media,
-    val url: Url,
+    val url: ResourceUrl,
 )

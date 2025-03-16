@@ -14,6 +14,7 @@ import com.yaikostudio.kparsetron.entities.users.Account
 import com.yaikostudio.kparsetron.network.Downloader
 import com.yaikostudio.kparsetron.network.NetworkHelperKtor.Companion.getCookies
 import com.yaikostudio.kparsetron.parsers.extensions.hasAnySegment
+import com.yaikostudio.kparsetron.parsers.extensions.toUrl
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
@@ -87,7 +88,7 @@ class InstagramReelParser(
                             name = fullName,
                             username = username,
                             isVerified = isVerified,
-                            profilePicUrl = ResourceUrl.Unprotected(profilePicUrl),
+                            profilePicUrl = ResourceUrl.Unprotected(profilePicUrl.toUrl()),
                             followers = edgeFollowedBy.count,
                         )
                     },
@@ -104,7 +105,7 @@ class InstagramReelParser(
                                         container = VideoContainer.MP4,
                                         videoCodec = null,
                                     ),
-                                    url = parseUrl(videoUrl!!) ?: return Result.failure(IllegalArgumentException("Invalid video URL")),
+                                    url = ResourceUrl.Unprotected(parseUrl(videoUrl!!)!!),
                                 ),
                             ),
                             audioAlternatives = emptyList(),
@@ -121,7 +122,7 @@ class InstagramReelParser(
                                     name = null,
                                     username = owner.username,
                                     isVerified = owner.isVerified,
-                                    profilePicUrl = ResourceUrl.Unprotected(owner.profilePicUrl),
+                                    profilePicUrl = ResourceUrl.Unprotected(owner.profilePicUrl.toUrl()),
                                     followers = null,
                                 ),
                                 postedAt = Instant.fromEpochSeconds(createdAt),

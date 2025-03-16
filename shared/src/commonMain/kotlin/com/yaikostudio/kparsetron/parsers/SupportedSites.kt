@@ -2,6 +2,7 @@ package com.yaikostudio.kparsetron.parsers
 
 import com.yaikostudio.kparsetron.network.Downloader
 import com.yaikostudio.kparsetron.parsers.instagram.InstagramReelParser
+import com.yaikostudio.kparsetron.parsers.xvideos.XvideosVideoParser
 import com.yaikostudio.kparsetron.parsers.youtube.YoutubeDetailParser
 
 class SupportedSites {
@@ -25,6 +26,7 @@ class SupportedSites {
         supportedSitesMapping = listOfParsers(
             YoutubeDetailParser(downloader),
             InstagramReelParser(downloader),
+            XvideosVideoParser(downloader),
         )
     }
 
